@@ -1,0 +1,17 @@
+{
+  "name": "notificator",
+  "tree": {
+    "$className": "DataModel",
+    "$ignoreUnknownInstances": true,
+
+    "ReplicatedStorage": {
+      "$path": "src"
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "example"
+      }
+    }
+  }
+}
