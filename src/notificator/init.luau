@@ -9,12 +9,14 @@ local TweenService = game:GetService("TweenService")
 local config = require(script.config)
 local template = script:FindFirstChild("Template") :: template
 
+local WIDTH = 250
+local MIN_HEIGHT = 50
 local IN_SPACING = 10
 local OUT_SPACING = 15
 local TWEEN_INFO = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 type class = {
-  new: (player_gui: PlayerGui) -> Notificator,
+  new: (player_gui: PlayerGui, order: number?) -> Notificator,
 
   notify: (self: Notificator, type: string, message: string, lifetime: number) -> (),
   remove: (self: Notificator, notification: template) -> (),
@@ -45,11 +47,12 @@ local function get_text_size(label: TextLabel)
   return TextService:GetTextSize(label.Text, font_size, font, Vector2.new(label.AbsoluteSize.X, label.AbsoluteSize.Y + math.huge))
 end
 
-function class.new(player_gui: PlayerGui) : Notificator
+function class.new(player_gui: PlayerGui, order: number?) : Notificator
   local screen_gui = Instance.new("ScreenGui")
   screen_gui.Name = "Notificator"
   screen_gui.IgnoreGuiInset = true
   screen_gui.Parent = player_gui
+  screen_gui.DisplayOrder = order or 1
   return setmetatable({
     screen_gui = screen_gui,
     current_size = OUT_SPACING,
@@ -68,9 +71,10 @@ function class:notify(type: string, message: string, lifetime: number)
   notification.Message.Text = message
 
   local text_size = get_text_size(notification.Message)
-  local size = ((IN_SPACING*2) + text_size.Y < 50) and 50 or (IN_SPACING*2) + text_size.Y
+  local font_size = notification.Message.TextSize
+  local size = ((IN_SPACING*2) + text_size.Y < MIN_HEIGHT) and MIN_HEIGHT or (IN_SPACING*2) + text_size.Y
 
-  notification.Size = UDim2.new(0, 250, 0, size)
+  notification.Size = UDim2.new(0, WIDTH, 0, size)
   notification.Position = UDim2.new(1, notification.AbsoluteSize.X + OUT_SPACING, 0, self.current_size)
 
   local goal = {Position = UDim2.new(1, -OUT_SPACING, 0, self.current_size)}
@@ -91,6 +95,7 @@ function class:remove(notification: template)
   local goal = {Position = UDim2.new(1, notification.AbsoluteSize.X + OUT_SPACING, 0, notification.AbsolutePosition.Y + notification.AbsoluteSize.Y)}
   local tween = TweenService:Create(notification, TWEEN_INFO, goal)
   tween:Play()
+  notification.ZIndex = 0
   tween.Completed:Once(function()
     notification:Destroy()
   end)
