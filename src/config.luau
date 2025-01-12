@@ -11,5 +11,9 @@ return {
   error = {
     icon = "rbxassetid://73894334952114",
     color = Color3.fromRGB(255, 75, 75)
+  },
+  warn = {
+    icon = "rbxassetid://121807596616831",
+    color = Color3.fromRGB(255, 157, 71)
   }
 } :: {[string] : notification_info}

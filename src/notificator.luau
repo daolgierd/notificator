@@ -28,7 +28,6 @@ export type Notificator = typeof(setmetatable({} :: {
 
 type notification = {
   lifetime: number,
-  is_playing: boolean,
   ui: template,
 }
 
@@ -67,18 +66,50 @@ function class:notify(type: string, message: string, lifetime: number)
   notification.Message.Text = message
 
   local text_size = get_text_size(notification.Message)
+  local size = ((IN_SPACING*2) + text_size.Y < 50) and 50 or (IN_SPACING*2) + text_size.Y
 
-  notification.Size = UDim2.new(0, 250, 0, (IN_SPACING*2) + text_size.Y)
+  notification.Size = UDim2.new(0, 250, 0, size)
   notification.Position = UDim2.new(1, notification.AbsoluteSize.X + OUT_SPACING, 0, self.current_size)
 
   local goal = {Position = UDim2.new(1, -OUT_SPACING, 0, self.current_size)}
   local tween = TweenService:Create(notification, TWEEN_INFO, goal)
   tween:Play()
 
-  self.current_size += notification.AbsoluteSize.Y + IN_SPACING
+  self.current_size += notification.AbsoluteSize.Y + OUT_SPACING
   notification.Parent = self.screen_gui
 
-  table.insert(self.notifications, {ui = notification, lifetime = lifetime, is_playing = false})
+  table.insert(self.notifications, {ui = notification, lifetime = lifetime})
+
+  task.delay(lifetime, function()
+    self:remove(notification)
+  end)
+end
+
+function class:remove(notification)
+  local goal = {Position = UDim2.new(1, notification.AbsoluteSize.X + OUT_SPACING, 0, notification.AbsolutePosition.Y + notification.AbsoluteSize.Y)}
+  local tween = TweenService:Create(notification, TWEEN_INFO, goal)
+  tween:Play()
+  tween.Completed:Once(function()
+    notification:Destroy()
+  end)
+  for i, notif in self.notifications do
+    if notif.ui == notification then
+      table.remove(self.notifications, i)
+      break
+    end
+  end
+  self:update()
+end
+
+function class:update()
+  local current_y = OUT_SPACING
+  for _, notif in self.notifications do
+    local goal = {Position = UDim2.new(1, -OUT_SPACING, 0, current_y)}
+    local tween = TweenService:Create(notif.ui, TWEEN_INFO, goal)
+    tween:Play()
+    current_y += notif.ui.AbsoluteSize.Y + OUT_SPACING
+    self.current_size = current_y
+  end
 end
 
 return class
