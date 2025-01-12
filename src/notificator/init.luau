@@ -6,7 +6,7 @@ class.__index = class
 local TextService = game:GetService("TextService")
 local TweenService = game:GetService("TweenService")
 
-local config = require("./config")
+local config = require(script.config)
 local template = script:FindFirstChild("Template") :: template
 
 local IN_SPACING = 10
@@ -17,6 +17,8 @@ type class = {
   new: (player_gui: PlayerGui) -> Notificator,
 
   notify: (self: Notificator, type: string, message: string, lifetime: number) -> (),
+  remove: (self: Notificator, notification: template) -> (),
+  update: (self: Notificator) -> (),
   __index: class
 }
 
@@ -85,7 +87,7 @@ function class:notify(type: string, message: string, lifetime: number)
   end)
 end
 
-function class:remove(notification)
+function class:remove(notification: template)
   local goal = {Position = UDim2.new(1, notification.AbsoluteSize.X + OUT_SPACING, 0, notification.AbsolutePosition.Y + notification.AbsoluteSize.Y)}
   local tween = TweenService:Create(notification, TWEEN_INFO, goal)
   tween:Play()
@@ -93,6 +95,12 @@ function class:remove(notification)
     notification:Destroy()
   end)
   for i, notif in self.notifications do
+    -- cant do shit about this *type error* (luau union types sucks)
+    if #self.notifications == 1 then
+      table.remove(self.notifications, i)
+      self.current_size = OUT_SPACING
+      return
+    end
     if notif.ui == notification then
       table.remove(self.notifications, i)
       break

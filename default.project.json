@@ -2,9 +2,9 @@
   "name": "notificator",
   "tree": {
     "$className": "DataModel",
-    "$ignoreUnknownInstances": true,
 
     "ReplicatedStorage": {
+      "$ignoreUnknownInstances": true,
       "$path": "src"
     },
 
