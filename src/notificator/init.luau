@@ -71,7 +71,6 @@ function class:notify(type: string, message: string, lifetime: number)
   notification.Message.Text = message
 
   local text_size = get_text_size(notification.Message)
-  local font_size = notification.Message.TextSize
   local size = ((IN_SPACING*2) + text_size.Y < MIN_HEIGHT) and MIN_HEIGHT or (IN_SPACING*2) + text_size.Y
 
   notification.Size = UDim2.new(0, WIDTH, 0, size)
@@ -92,7 +91,7 @@ function class:notify(type: string, message: string, lifetime: number)
 end
 
 function class:remove(notification: template)
-  local goal = {Position = UDim2.new(1, notification.AbsoluteSize.X + OUT_SPACING, 0, notification.AbsolutePosition.Y + notification.AbsoluteSize.Y)}
+  local goal = {Position = UDim2.new(1, notification.AbsoluteSize.X + OUT_SPACING, 0, notification.AbsolutePosition.Y)}
   local tween = TweenService:Create(notification, TWEEN_INFO, goal)
   tween:Play()
   notification.ZIndex = 0
@@ -100,12 +99,12 @@ function class:remove(notification: template)
     notification:Destroy()
   end)
   for i, notif in self.notifications do
-    -- cant do shit about this *type error* (luau union types sucks)
     if #self.notifications == 1 then
       table.remove(self.notifications, i)
       self.current_size = OUT_SPACING
       return
     end
+    -- cant do shit about this *type error* (luau union types sucks)
     if notif.ui == notification then
       table.remove(self.notifications, i)
       break
